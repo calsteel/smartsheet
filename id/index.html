@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ID Card Generator</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/handsontable/dist/handsontable.full.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+        }
+        #dataTable {
+            flex: 1;
+        }
+        #photoUpload {
+            flex: 1;
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .drop-zone {
+            width: 300px;
+            height: 150px;
+            border: 2px dashed #cccccc;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #cccccc;
+            text-align: center;
+            cursor: pointer;
+        }
+        .drop-zone.active {
+            border-color: #4CAF50;
+            color: #4CAF50;
+        }
+        .hidden-input {
+            display: none;
+        }
+        .uploaded-images {
+            margin-top: 10px;
+        }
+        .submit-container {
+            flex: 0.5;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        input[type="submit"] {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>ID Card Generator</h1>
+    <div class="container">
+        <div id="dataTable"></div>
+        
+        <div id="photoUpload">
+            <h3>Photo Upload</h3>
+            <div class="drop-zone" id="drop-zone">Drag and drop images here or click to upload</div>
+            <input type="file" name="photos[]" id="file-input" multiple class="hidden-input" accept="image/*">
+            <div class="uploaded-images" id="uploaded-images"></div>
+        </div>
+        
+        <div class="submit-container">
+            <form id="idCardForm" action="generate_id_card2.php" method="post">
+                <input type="hidden" id="jsonData" name="jsonData"> <!-- Hidden field to send data -->
+                <input type="submit" value="Upload and Generate ID Cards">
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/handsontable/dist/handsontable.full.min.js"></script>
+    <script>
+        // Initialize Handsontable grid
+        const container = document.getElementById('dataTable');
+        const hot = new Handsontable(container, {
+            data: Array.from({ length: 50 }, () => ['', '', '']),
+            colHeaders: ['Name', 'Sage ID', 'Scanco ID'],
+            columns: [{ data: 0 }, { data: 1 }, { data: 2 }],
+            minSpareRows: 1,
+            rowHeaders: true,
+            manualColumnResize: true,
+            minRows: 50,
+            licenseKey: 'non-commercial-and-evaluation'
+        });
+
+        // On form submit, convert table data to JSON and store it in a hidden field
+        document.querySelector('form').addEventListener('submit', function (e) {
+            const jsonData = JSON.stringify(hot.getData());
+            document.getElementById('jsonData').value = jsonData;
+        });
+
+        const dropZone = document.getElementById('drop-zone');
+        const fileInput = document.getElementById('file-input');
+        const uploadedImagesDiv = document.getElementById('uploaded-images');
+
+        dropZone.addEventListener('click', () => fileInput.click());
+
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('active');
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('active');
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('active');
+            fileInput.files = e.dataTransfer.files;
+            uploadFiles(fileInput.files);
+        });
+
+        fileInput.addEventListener('change', () => {
+            uploadFiles(fileInput.files);
+        });
+
+        function uploadFiles(files) {
+            const formData = new FormData();
+            for (const file of files) {
+                formData.append('photos[]', file);
+            }
+
+            fetch('upload_images.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    displayUploadedImages(data.uploaded);
+                } else {
+                    alert('Error uploading images.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+
+        function displayUploadedImages(images) {
+            uploadedImagesDiv.innerHTML = '';
+            images.forEach(image => {
+                const imgElement = document.createElement('img');
+                imgElement.src = `images/${image}`;
+                imgElement.alt = image;
+                imgElement.width = 100;
+                uploadedImagesDiv.appendChild(imgElement);
+            });
+        }
+    </script>
+</body>
+</html>

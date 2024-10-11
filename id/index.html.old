@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ID Card Generator</title>
+    <style>
+        .employee-row {
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <h1>ID Card Generator</h1>
+    <form action="generate_id_card.php" method="post" enctype="multipart/form-data">
+        <div id="employees">
+            <div class="employee-row">
+                <label>Name:</label>
+                <input type="text" name="name[]" required autocomplete="off">
+                <label>Sage ID:</label>
+                <input type="text" name="id_number[]" required autocomplete="off">
+                <label>Scanco ID:</label>
+                <input type="text" name="scanco_id[]" required autocomplete="off">
+                <label>Photo (optional):</label>
+                <input type="file" name="photo[]" accept="image/*">
+            </div>
+        </div>
+        <button type="button" onclick="addRow()">Add Another Employee</button>
+        <br><br>
+        <input type="submit" value="Generate ID Cards">
+    </form>
+
+    <script>
+        function addRow() {
+            // Create a new div element with the class 'employee-row'
+            const newRow = document.createElement('div');
+            newRow.classList.add('employee-row');
+
+            // Add the inner HTML for the new row with Scanco ID
+            newRow.innerHTML = `
+                <label>Name:</label>
+                <input type="text" name="name[]" required autocomplete="off">
+                <label>Sage ID:</label>
+                <input type="text" name="id_number[]" required autocomplete="off">
+                <label>Scanco ID:</label>
+                <input type="text" name="scanco_id[]" required autocomplete="off">
+                <label>Photo (optional):</label>
+                <input type="file" name="photo[]" accept="image/*">
+            `;
+
+            // Append the new row to the employees div
+            document.getElementById('employees').appendChild(newRow);
+        }
+    </script>
+</body>
+</html>
