@@ -1,0 +1,7 @@
+{
+    "name": "myvendor/label",
+    "require": {
+        "endroid/qr-code": "^4.6",
+        "chillerlan/php-qrcode": "^5.0"
+    }
+}

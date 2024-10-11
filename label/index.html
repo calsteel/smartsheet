@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Shipping Label Generator</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="mobile-web-app-capable" content="yes">
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            width: 100%;
+            max-width: 1200px;
+        }
+        .form-container, .label-container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin: 10px;
+            box-sizing: border-box;
+        }
+        .form-container {
+            flex: 1;
+            max-width: 48%;
+        }
+        .label-container {
+            flex: 1;
+            max-width: 48%;
+            display: inline;
+            justify-content: center;
+            align-items: center;
+        }
+        .buttons-container {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .buttons-container button {
+            margin: 5px;
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .buttons-container button#myButton {
+            background-color: #4CAF50; /* Green */
+            color: white;
+        }
+        .buttons-container button#newLabelButton {
+            background-color: #008CBA; /* Blue */
+            color: white;
+        }
+        .buttons-container button#parseScanButton {
+            background-color: #f44336; /* Red */
+            color: white;
+        }
+        .label-row {
+            display: flex;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+        }
+        .label-row label, .label-row input {
+            flex-basis: 30%;
+            margin-top: 10px;
+        }
+        .label-row label {
+            margin-right: 2%;
+            text-align: left;
+        }
+        .label-row input {
+            margin-left: 2%;
+            padding: 8px;
+            font-size: 16px;
+        }
+        #num_copies {
+            width: 50px; /* Adjust as needed */
+        }
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+            .form-container, .label-container {
+                max-width: 100%;
+                margin: 10px 0;
+            }
+            .label-row label, .label-row input {
+                flex-basis: 100%;
+                margin: 0;
+            }
+            .label-row label {
+                margin-top: 10px;
+            }
+            .label-row input {
+                margin-bottom: 10px;
+            }
+            .label-container {
+                display: flex;
+            }
+        }
+        .empty-input {
+            background-color: lightyellow;
+        }
+        #scan_code {
+            color: lightgreen;
+        }
+        #scan_code:focus {
+            border: 10px solid greenyellow;
+        }
+        .filled-input-scan {
+            background-color: lightgreen;
+        }
+        .filled-input-quantity {
+            background-color: white;
+        }
+    </style>
+	<script type="text/javascript">window.$crisp=[];window.CRISP_WEBSITE_ID="532052a7-7c52-41c4-a630-d62cc68c61b7";(function(){d=document;s=d.createElement("script");s.src="https://client.crisp.chat/l.js";s.async=1;d.getElementsByTagName("head")[0].appendChild(s);})();</script>
+</head>
+<body>
+    <div class="container">
+        <div class="form-container">
+            <div class="buttons-container">
+                <button type="button" onclick="location.reload();">New Label</button>
+                <button type="submit" id="myButton">Print Label</button>
+            </div>
+            <form id="labelForm">
+                <div>
+                    <div id="status" class="status"></div>
+                    <input type="text" id="scan_code" name="scan_code" required autocomplete="off" placeholder="Barcode Scan Select" class="empty-input" readonly onfocus="this.removeAttribute('readonly');" onblur="this.setAttribute('readonly', 'readonly');">
+                </div>
+                <br>
+                <label for="template">Select Template:</label>
+                <select id="template" name="template" required>
+                    <option value="template1">Leveling for Order</option>
+                    <option value="template3">Part for Order</option>
+                    <option value="template4">Part for Inventory</option>                
+                    <option value="template2">Leveling for Inventory</option>    
+                </select>
+                <br><br>
+                <label for="printer">Select Printer:</label>
+                <select id="printer" name="printer" required>
+					
+					<option value="//192.168.20.109/warehouse">Forming </option>
+					
+					
+					
+					<option value="//192.168.20.113/warehouse1">Shop</option>
+					<!-- //192.168.20.124/warehouse1 -->
+					<option value="//192.168.5.142/10K Label Printer">Laser 10KW</option>
+					
+                    <option value="//192.168.5.75/Z">Laser 12KW</option>
+					<option value="//192.168.5.86/DBI Printer">DBI</option>
+                    <option value="//192.168.20.54/DNE Label Printer">DNE</option>
+                    <option value="//192.168.5.137/QC South">QC North</option>
+					<option value="//SHIPPINGPC-OLD/warehouse1">Warehouse 1 </option>
+					<option value="//192.168.20.124/warehouse1">Warehouse 2 </option>
+                    
+                   
+                </select>
+                <br><br>
+                <label for="num_copies">Number of Copies:</label>
+                <input type="number" id="num_copies" name="num_copies" value="1" min="1" required>
+                <br><br>
+                <div class="label-row">
+                    <label for="quantity">Quantity:</label>
+                    <input type="number" id="quantity" name="quantity" required autocomplete="off" class="empty-input">
+                    <label for="customerno">Customer Number:</label>
+                    <input type="text" id="customerno" name="customerno" required autocomplete="off">
+                    <label for="sales_order">Sales Order:</label>
+                    <input type="text" id="sales_order" name="sales_order" autocomplete="off">
+                    <label for="purchase_order">Purchase Order:</label>
+                    <input type="text" id="purchase_order" name="purchase_order" autocomplete="off">
+                    <input type="hidden" id="customername" name="customername" required autocomplete="off">
+                    <input type="hidden" id="lot" name="lot" required autocomplete="off">
+                    <label for="heat">Heat #:</label>
+                    <input type="text" id="heat" name="heat" required autocomplete="off">
+                    <label for="tag">Tag #:</label>
+                    <input type="text" id="tag" name="tag" required autocomplete="off">
+                    <label for="thickness">Thickness:</label>
+                    <input type="text" id="thickness" name="thickness" required autocomplete="off">
+                    <label for="width">Width:</label>
+                    <input type="text" id="width" name="width" required autocomplete="off">
+                    <label for="length">Length:</label>
+                    <input type="text" id="length" name="length" required autocomplete="off">
+                    <label for="grade">Grade:</label>
+                    <input type="text" id="grade" name="grade" required autocomplete="off">
+                    <input type="hidden" id="type" name="type" required autocomplete="off">
+                    <label for="item_code">Item Code:</label>
+                    <input type="text" id="item_code" name="item_code" required autocomplete="off">
+                    <label for="description">Description:</label>
+                    <input type="text" id="description" name="description" required autocomplete="off">
+                </div>
+            </form>
+        </div>
+        <div class="label-container" id="labelPreview">
+            <!-- Label preview will be displayed here -->
+        </div>
+    </div>
+<script>
+	
+    window.onload = function() {
+    generatePreview();
+    const formElements = document.querySelectorAll('#labelForm input:not(#scan_code), #labelForm select');
+    formElements.forEach(element => {
+        element.addEventListener('input', generatePreview);
+    });
+
+    // Automatically fill the printer field based on the URL parameter
+    const urlParams = new URLSearchParams(window.location.search);
+    const printerValue = urlParams.get('printer');
+
+    if (printerValue) {
+        const printerSelect = document.getElementById('printer');
+        const options = printerSelect.options;
+
+        for (let i = 0; i < options.length; i++) {
+            if (options[i].text.trim().toLowerCase() === printerValue.trim().toLowerCase()) {
+                printerSelect.selectedIndex = i;
+                break;
+            }
+        }
+    }
+};
+
+
+
+    function parseScanData() {
+        const scanData = document.getElementById('scan_code').value;
+        const data = scanData.split(';');
+        document.getElementById('lot').value = data[0] || '';
+        document.getElementById('heat').value = data[1] || '';
+        document.getElementById('tag').value = data[2] || '';
+        document.getElementById('grade').value = data[3] || '';
+        document.getElementById('thickness').value = data[4] || '';
+        document.getElementById('width').value = data[5] || '';
+        document.getElementById('length').value = data[6] || '';
+        document.getElementById('type').value = data[7] || '';
+        document.getElementById('sales_order').value = data[8] || '';
+        document.getElementById('purchase_order').value = data[9] || '';
+        document.getElementById('item_code').value = data[10] || '';
+        document.getElementById('description').value = data[11] || '';
+        document.getElementById('customerno').value = data[12] || '';
+        document.getElementById('customername').value = data[13] || '';
+       // document.getElementById('quantity').value = data[14] || '';
+        handleTemplateSelection(data);
+        generatePreview();
+    }
+
+    function handleTemplateSelection(data) {
+        const data15 = data[14] || '';
+        const data16 = data[15] || '';
+        let templateValue = '';
+
+        if (data15 === 'DBILE' && data16 === '') {
+            templateValue = 'template2'; // Leveling for inventory
+        } else if (data15 === 'DBILE' && data16 !== '') {
+            templateValue = 'template1'; // Leveling for order
+        } else if (data15 !== 'DBILE' && data16 === '') {
+            templateValue = 'template4'; // Part for inventory
+        } else if (data15 !== 'DBILE' && data16 !== '') {
+            templateValue = 'template3'; // Part for order
+        }
+
+        // Set the template option
+        const templateSelect = document.getElementById('template');
+        templateSelect.value = templateValue;
+        handleTemplateChange();
+    }
+
+    function handleTemplateChange() {
+        const templateSelect = document.getElementById('template');
+        const selectedTemplate = templateSelect.value.trim();
+
+        // Hide specific fields based on template selection
+        const salesOrderField = document.getElementById('sales_order');
+        const customerNumberField = document.getElementById('customerno');
+        const salesOrderLabel = document.querySelector('label[for="sales_order"]');
+        const customerNumberLabel = document.querySelector('label[for="customerno"]');
+        const purchaseOrderField = document.getElementById('purchase_order');
+        const purchaseOrderLabel = document.querySelector('label[for="purchase_order"]');
+        const thicknessField = document.getElementById('thickness');
+        const widthField = document.getElementById('width');
+        const lengthField = document.getElementById('length');
+        const gradeField = document.getElementById('grade');
+        const thicknessLabel = document.querySelector('label[for="thickness"]');
+        const widthLabel = document.querySelector('label[for="width"]');
+        const lengthLabel = document.querySelector('label[for="length"]');
+        const gradeLabel = document.querySelector('label[for="grade"]');
+
+        if (selectedTemplate === 'template1') {  // Leveling for Order
+            salesOrderField.style.display = 'block';
+            customerNumberField.style.display = 'block';
+            salesOrderLabel.style.display = 'block';
+            customerNumberLabel.style.display = 'block';
+            purchaseOrderField.style.display = 'block';
+            purchaseOrderLabel.style.display = 'block';
+            thicknessField.style.display = 'block';
+            widthField.style.display = 'block';
+            lengthField.style.display = 'block';
+            gradeField.style.display = 'block';
+            thicknessLabel.style.display = 'block';
+            widthLabel.style.display = 'block';
+            lengthLabel.style.display = 'block';
+            gradeLabel.style.display = 'block';
+            
+        } else if (selectedTemplate === 'template2') { // Leveling for Inventory
+            salesOrderField.style.display = 'none';
+            customerNumberField.style.display = 'none';
+            salesOrderLabel.style.display = 'none';
+            customerNumberLabel.style.display = 'none';
+            purchaseOrderField.style.display = 'none';
+            purchaseOrderLabel.style.display = 'none';
+            thicknessField.style.display = 'block';
+            widthField.style.display = 'block';
+            lengthField.style.display = 'block';
+            gradeField.style.display = 'block';
+            thicknessLabel.style.display = 'block';
+            widthLabel.style.display = 'block';
+            lengthLabel.style.display = 'block';
+            gradeLabel.style.display = 'block';
+        } else if (selectedTemplate === 'template3') {  // Part for Order
+            salesOrderField.style.display = 'block';
+            customerNumberField.style.display = 'block';
+            salesOrderLabel.style.display = 'block';
+            customerNumberLabel.style.display = 'block';
+            purchaseOrderField.style.display = 'block';
+            purchaseOrderLabel.style.display = 'block';
+            thicknessField.style.display = 'none';
+            widthField.style.display = 'none';
+            lengthField.style.display = 'none';
+            gradeField.style.display = 'none';
+            thicknessLabel.style.display = 'none';
+            widthLabel.style.display = 'none';
+            lengthLabel.style.display = 'none';
+            gradeLabel.style.display = 'none';
+        } else if (selectedTemplate === 'template4') { // Part for Inventory
+            salesOrderField.style.display = 'none';
+            customerNumberField.style.display = 'none';
+            salesOrderLabel.style.display = 'none';
+            customerNumberLabel.style.display = 'none';
+            purchaseOrderField.style.display = 'none';
+            purchaseOrderLabel.style.display = 'none';
+            thicknessField.style.display = 'none';
+            widthField.style.display = 'none';
+            lengthField.style.display = 'none';
+            gradeField.style.display = 'none';
+            thicknessLabel.style.display = 'none';
+            widthLabel.style.display = 'none';
+            lengthLabel.style.display = 'none';
+            gradeLabel.style.display = 'none';
+        }
+    }
+
+    function generatePreview() {
+        const formData = new FormData(document.getElementById('labelForm'));
+        fetch('generate_label.php', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.text())
+        .then(html => {
+            document.getElementById('labelPreview').innerHTML = html;
+        })
+        .catch(error => console.error('Error:', error));
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const templateSelect = document.getElementById('template');
+        const scanCodeField = document.getElementById('scan_code');
+
+        templateSelect.addEventListener('change', function() {
+            handleTemplateChange();
+            scanCodeField.value = '';
+            scanCodeField.dispatchEvent(new Event('input')); // Trigger input event
+            // Focus on scan_code field
+            scanCodeField.focus();
+            generatePreview(); // Call generatePreview to update the preview
+        });
+
+        // Focus on the input field initially to allow scanning
+        scanCodeField.addEventListener('focus', function() {
+            scanCodeField.placeholder = 'Barcode Scanner On';
+        });
+
+        scanCodeField.addEventListener('blur', function() {
+            scanCodeField.placeholder = 'Barcode Scanner Off';
+        });
+
+        window.addEventListener('load', function() {
+            scanCodeField.focus();
+        });
+
+        // Add event listener to run parseScanData() when text is entered
+        scanCodeField.addEventListener('input', function() {
+            parseScanData();
+        });
+
+        // Add validation for the quantity field
+        document.getElementById('myButton').addEventListener('click', function(event) {
+            const quantityField = document.getElementById('quantity');
+            if (quantityField.value.trim() === '') {
+                alert('Please enter a quantity');
+                quantityField.focus();
+                return false; // Prevent form submission
+            } else {
+                const form = document.getElementById('printLabelForm');
+                if (form) {
+                    const formData = new FormData(form);
+                    fetch('print_label.php', {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => response.text())
+                    .then(result => {
+                        const statusDiv = document.getElementById('status');
+                        statusDiv.innerHTML = result;
+                        statusDiv.className = 'status success';
+                        statusDiv.style.display = 'block';
+                        setTimeout(() => { statusDiv.style.display = 'none'; }, 5000);
+                    })
+                    .catch(error => {
+                        const statusDiv = document.getElementById('status');
+                        statusDiv.innerHTML = 'Error: ' + error;
+                        statusDiv.className = 'status error';
+                        statusDiv.style.display = 'block';
+                        setTimeout(() => { statusDiv.style.display = 'none'; }, 5000);
+                    });
+                } else {
+                    console.error('Form not found');
+                }
+            }
+        });
+    });
+</script>
+</body>
+</html>
